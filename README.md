@@ -70,7 +70,7 @@ conda create -y --name scgenept python=3.10 # or python3.10 -m venv scgenept
 source activate scgenept
 pip install -r requirements.txt
 pip install flash-attn --no-build-isolation
-pip install scgpt "flash-attn<1.0.5"
+pip install scgpt==0.2.1 "flash-attn<1.0.5"
 ```
 
 **Step 4: Training Data** <br>
@@ -113,7 +113,7 @@ For inference, we recommend not using flash attention:
 python3.10 -m venv scgenept
 source scgenept/bin/activate
 pip install -r requirements.txt
-pip install scgpt 
+pip install scgpt==0.2.1 
 ```
 
 Same tutorial can be found as a Google Collab notebook [here]()
