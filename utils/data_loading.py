@@ -338,7 +338,7 @@ def load_pretrained_model(model, load_param_prefixs, verbose, model_file, device
     model = load_pretrained(model, torch.load(model_file, map_location=device), verbose=verbose, prefix=load_param_prefixs)
     return model
 
-def load_trained_scgenept_model(adata, model_type, models_dir, model_location, device, verbose = False):
+def load_trained_scgenept_model(adata, model_type, models_dir, model_location, device, verbose = False, use_flash_attn=False):
     embs_to_include = get_embs_to_include(model_type)
     vocab_file = models_dir + 'pretrained/scgpt/vocab.json'
     vocab, gene_ids, dataset_genes, gene2idx = match_genes_to_scgpt_vocab_from_adata(vocab_file, adata, SPECIAL_TOKENS)
@@ -346,8 +346,16 @@ def load_trained_scgenept_model(adata, model_type, models_dir, model_location, d
     genept_embs, genept_emb_type, genept_emb_dim, found_genes_genept = initialize_genept_embeddings(embs_to_include, dataset_genes, vocab, model_type, models_dir)
     go_embs_to_include, go_emb_type, go_emb_dim, found_genes_go = initialize_go_embeddings(embs_to_include, dataset_genes, vocab, model_type, models_dir)
 
-    # we disable flash attention for inference for simplicity
     use_fast_transformer = False
+    if use_flash_attn:
+        try:
+            from flash_attn.flash_attention import FlashMHA
+            use_fast_transformer = True
+            if verbose:
+                print("FlashAttention enabled")
+        except ImportError:
+            if verbose:
+                print("FlashAttention requested but not installed, falling back to standard attention")
 
     model = scGenePT(
         ntoken=ntokens,
